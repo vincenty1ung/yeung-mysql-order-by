@@ -125,7 +125,7 @@ INSERT INTO `test` VALUES (18, 'test', '2019-09-04 12:46:17', 16);
 SET FOREIGN_KEY_CHECKS = 1;
 ```
 ----
-### 开始长驱直入
+### 普通索引实验
 ```sql
 --索引实验-查询条件[*]和[具体参数]的区别
 --1
@@ -158,7 +158,7 @@ EXPLAIN SELECT age FROM test WHERE name ="gggg";
 + 当查询命中索引列，查询列也为索引列，查询效率最高，不需要访问表，推荐使用
 + 当命中索引时type=ref，非唯一索引访问(只有普通索引)
  ----
- 
+### 排序基础版实验 
 ```sql
 ---排序实验：无查询条件 查询列* 命中索引&非命中索引
 EXPLAIN SELECT * FROM test ORDER BY id desc;
@@ -184,3 +184,41 @@ EXPLAIN SELECT * FROM test ORDER BY age desc;
 + 从sql1取出全表数据{全表扫描}，但是排序却使用了主键id，由于id已经是排好顺序，所以先读了主键索引，但还是拿了全表的数据，只是没有进行排序。
 + 从sql2中可以看出type：all Extra为Using filesort 说明全表扫描了数据，并进行了针对age的二次排序所以产生了Using filesort
  ----
+### 排序进阶版实验 
+```sql
+---排序实验：无查询条件 查询列*/命中索引列/非命中索引列
+EXPLAIN SELECT * FROM test ORDER BY name desc;
+EXPLAIN SELECT age FROM test ORDER BY name desc;
+EXPLAIN SELECT id FROM test ORDER BY name desc;
+EXPLAIN SELECT name FROM test ORDER BY name desc;
+
+```
+
+##### EXPLAIN 结果
++  1 全表扫描type：all，Extra为Using filesort
+
+ id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra 
+ :------| :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ 
+1 | SIMPLE | test | null | ALL | null | null | null | null | 13 | 100.00 | Using filesort
++  2 全表扫描type：all，Extra为Using filesort
+
+ id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra 
+ :------| :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ 
+1 | SIMPLE | test | null | ALL | null | null | null | null | 13 | 100.00 | Using filesort
++  3 全表扫描type：index，Extra为Using index
+
+ id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra 
+ :------| :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ 
+1 | SIMPLE | test | null | index | null | index_test_name | 768 | null | 13 | 100.00 | Using index
++  4 全表扫描type：index，Extra为Using index
+
+ id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra 
+ :------| :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ 
+1 | SIMPLE | test | null | index | null | index_test_name | 768 | null | 13 | 100.00 | Using index
+
+##### 综上所述
++ sql1&sql2由于查询列使用[*] 根据第一次论证已解释（回表就是索引上获取不到列的数据 需要从表里面把数据查出来）所以造成了全表扫描，后又根据name排序造成了二次排序，产生了Extra为Using index
++ sql3&sql4查询列中只存在索引列，所以使用了覆盖索引Extra为Using index，
++ 至于本小段的sql1和上一小段sql1都是索引，只不过一个是主键索引一个是普通索引，结果确是order by id：tyep为index & order by name：tyep为all [请点击这里见解答](https://segmentfault.com/q/1010000004197413)
+ ----
+ **排序基础版实验 待续。。。**
