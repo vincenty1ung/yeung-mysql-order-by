@@ -158,3 +158,29 @@ EXPLAIN SELECT age FROM test WHERE name ="gggg";
 + 当查询命中索引列，查询列也为索引列，查询效率最高，不需要访问表，推荐使用
 + 当命中索引时type=ref，非唯一索引访问(只有普通索引)
  ----
+ 
+```sql
+---排序实验：无查询条件 查询列* 命中索引&非命中索引
+EXPLAIN SELECT * FROM test ORDER BY id desc;
+EXPLAIN SELECT * FROM test ORDER BY age desc;
+```
+
+##### EXPLAIN 结果
++  1 命中了索引 PRIMARY，Extra为null
+
+ id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra 
+ :------| :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ 
+1 | SIMPLE | test | null | index | null | PRIMARY | 4 | null | 13 | 100.00 | null
++  2 未命中了索引全表扫描，Extra为Using filesort，
+
+ id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra 
+ :------| :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ 
+1 | SIMPLE | test | null | ALL | null | null | null | null | 13 | 100.00 | Using filesort
+
+##### 综上所述
++ 论证type为index和ref的区别：
++ index：按索引次序扫描，先读索引，再读实际的行，结果还是全表扫描，主要优点是避免了排序。因为索引是排好的。
++ ref：当命中索引时type=ref，非唯一索引访问(只有普通索引)
++ 从sql1取出全表数据{全表扫描}，但是排序却使用了主键id，由于id已经是排好顺序，所以先读了主键索引，但还是拿了全表的数据，只是没有进行排序。
++ 从sql2中可以看出type：all Extra为Using filesort 说明全表扫描了数据，并进行了针对age的二次排序所以产生了Using filesort
+ ----
