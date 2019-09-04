@@ -124,3 +124,37 @@ INSERT INTO `test` VALUES (18, 'test', '2019-09-04 12:46:17', 16);
 
 SET FOREIGN_KEY_CHECKS = 1;
 ```
+----
+### 开始长驱直入
+```sql
+--索引实验-查询条件[*]和[具体参数]的区别
+--1
+EXPLAIN SELECT * FROM test WHERE name ="gggg";
+--2
+EXPLAIN SELECT name FROM test WHERE name ="gggg";
+--3
+EXPLAIN SELECT age FROM test WHERE name ="gggg";
+```
+##### EXPLAIN 结果
++  1 命中了索引 index_test_name，Extra为null
+
+ id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra 
+ :------| :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ 
+1 | SIMPLE | test | null | ref | index_test_name,index_test_name_id | index_test_name | 768 | const | 3 | 100.00 | null
++  2 命中了索引 index_test_name，Extra为Using index，使用了覆盖索引，直接可以从索引中取出数据不需要访问表
+
+ id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra 
+ :------| :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ 
+1 | SIMPLE | test | null | ref | index_test_name,index_test_name_id | index_test_name | 768 | const | 3 | 100.00 | Using index
+
++  3 命中了索引 index_test_name，Extra为null
+
+  id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra 
+  :------| :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ 
+ 1 | SIMPLE | test | null | ref | index_test_name,index_test_name_id | index_test_name | 768 | const | 3 | 100.00 | null
+
+##### 综上所述
++ 查询最好避免使用[*]作为查询列
++ 当查询命中索引列，查询列也为索引列，查询效率最高，不需要访问表，推荐使用
++ 当命中索引时type=ref，非唯一索引访问(只有普通索引)
+ ----
