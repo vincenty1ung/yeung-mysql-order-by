@@ -1,7 +1,7 @@
 # Mysql order by 长驱直入
 
-###前请提要「EXPLAIN」常规基础
-#####「EXPLAIN」结果如下：
+### 前请提要「EXPLAIN」常规基础
+##### 「EXPLAIN」结果如下：
  id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra 
  :------| :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ 
 1 | SIMPLE | test | null | index | index_test_name | index_test_name | 768 | const | 3 | 100.00 | Using index 
