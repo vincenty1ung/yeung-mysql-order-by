@@ -221,4 +221,4 @@ EXPLAIN SELECT name FROM test ORDER BY name desc;
 + sql3&sql4查询列中只存在索引列，所以使用了覆盖索引Extra为Using index，
 + 至于本小段的sql1和上一小段sql1都是索引，只不过一个是主键索引一个是普通索引，结果确是order by id：tyep为index & order by name：tyep为all [请点击这里见解答](https://segmentfault.com/q/1010000004197413)
  ----
- **排序基础版实验 待续。。。**
+ **排序搞鸡版实验 待续。。。**
