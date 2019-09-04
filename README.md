@@ -7,7 +7,7 @@
 1 | SIMPLE | test | null | index | index_test_name | index_test_name | 768 | const | 3 | 100.00 | Using index 
 
 -----
-##### 1.type ： 类型
+##### 1.type
 ###### 包括System,const,eq_ref,ref,range,index,all   
 + all : 即全表扫描
 + index : 按索引次序扫描，先读索引，再读实际的行，结果还是全表扫描，主要优点是避免了排序。因为索引是排好的。
@@ -18,11 +18,16 @@
 当结果不是一条时，就会变成index或range等其他类型
 + system : 系统查询
 + null : 优化过程中就已经得到结果，不在访问表或索引
-##### 2.possible_keys ： 可能用到的索引
-##### 3.key ： 实际用到的索引
-##### 4.key_line ： 索引字段最大可能使用长度
-##### 5.ref ： 指出对 key 列所选择的索引的查找方式，常见的值有 const, func, NULL, 具体字段名。当 key 列为 NULL ，即不使用索引时，此值也相应的为 NULL 。
-##### 6.rows ： 估计需要扫描的行数
+##### 2.possible_keys
++ 可能用到的索引
+##### 3.key
++ 实际用到的索引
+##### 4.key_line
++ 索引字段最大可能使用长度
+##### 5.ref
++ 指出对 key 列所选择的索引的查找方式，常见的值有 const, func, NULL, 具体字段名。当 key 列为 NULL ，即不使用索引时，此值也相应的为 NULL 。
+##### 6.rows
++ 估计需要扫描的行数
 ##### 7.Extra ： 显示以上信息之外的其他信息
 + Using index
 此查询使用了覆盖索引(Covering Index)，即通过索引就能返回结果，无需访问表。
