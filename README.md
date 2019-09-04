@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/uncleyeung">
-   <img alt="Uncle-Yeong-Logo" src="./web/img/logo1.jpg">
+   <img alt="Uncle-Yeung-Logo" src="./web/img/logo1.jpg">
   </a>
 </p>
 
