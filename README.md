@@ -48,3 +48,58 @@ MySQL 使用临时表来实现 distinct 操作。
 select * from a order by id;
 对于没有索引的列进行order by 就会出现filesort
 -----
+
+### 准备一些基础数据
+```sql
+/*
+ Navicat Premium Data Transfer
+
+ Source Server         : xx
+ Source Server Type    : MySQL
+ Source Server Version : 50722
+ Source Host           : xx:3306
+ Source Schema         : test
+
+ Target Server Type    : MySQL
+ Target Server Version : 50722
+ File Encoding         : 65001
+
+ Date: 04/09/2019 15:48:50
+*/
+
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for test
+-- ----------------------------
+DROP TABLE IF EXISTS `test`;
+CREATE TABLE `test`  (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `login_time` datetime(0) NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(0),
+  `age` int(11) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `index_test_name`(`name`) USING BTREE,
+  INDEX `index_test_name_id`(`name`, `id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Records of test
+-- ----------------------------
+INSERT INTO `test` VALUES (1, 'aaa', '2019-09-04 12:45:49', 12);
+INSERT INTO `test` VALUES (2, 'bbbb', '2019-09-04 12:45:50', 13);
+INSERT INTO `test` VALUES (4, 'dddd', '2019-09-04 12:45:52', 14);
+INSERT INTO `test` VALUES (5, 'eeee', '2019-09-04 12:45:54', 13);
+INSERT INTO `test` VALUES (6, 'fff', '2019-09-04 12:45:56', 12);
+INSERT INTO `test` VALUES (7, 'gggg', '2019-09-04 12:45:58', 11);
+INSERT INTO `test` VALUES (8, 'gggg', '2019-09-04 12:46:00', 15);
+INSERT INTO `test` VALUES (10, 'gggg', '2019-09-04 12:46:02', 20);
+INSERT INTO `test` VALUES (11, 'aaa', '2019-09-04 12:46:04', 21);
+INSERT INTO `test` VALUES (12, 'abcdfr', '2019-09-04 12:46:06', 19);
+INSERT INTO `test` VALUES (13, 'abcdfr', '2019-09-04 12:46:11', 18);
+INSERT INTO `test` VALUES (14, 'dsdafd', '2019-09-04 12:46:13', 15);
+INSERT INTO `test` VALUES (18, 'test', '2019-09-04 12:46:17', 16);
+
+SET FOREIGN_KEY_CHECKS = 1;
+```
