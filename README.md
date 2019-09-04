@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/uncleyeung">
-   <img alt="Uncle-Yeung-Logo" src="./web/img/logo1.jpg">
+   <img alt="Uncle-Yeung-Logo" src="https://raw.githubusercontent.com/uncleyeung/uncleyeung.github.io/master/web/img/logo1.jpg">
   </a>
 </p>
 
@@ -18,6 +18,7 @@
     <img alt="code style" src="https://img.shields.io/badge/license-Apache%202-4EB1BA.svg?style=flat-square">
   </a>
 </p>
+
 # Mysql order by 长驱直入
 
 ### 前请提要「EXPLAIN」常规基础
