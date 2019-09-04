@@ -21,7 +21,7 @@
 
 # Mysql order by 长驱直入
 
-### 前请提要「EXPLAIN」常规基础
+### 前情提要「EXPLAIN」常规基础
 ##### 「EXPLAIN」结果如下：
  id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra 
  :------| :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ 
