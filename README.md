@@ -70,7 +70,7 @@ MySQL 使用临时表来实现 distinct 操作。
 若查询所需的排序与使用的索引的排序一致，因为索引是已排序的，因此按索引的顺序读取结果返回，否则，在取得结果后，还需要按查询所需的顺序对结果进行排序，这时就会出现 Using filesort 。
 select * from a order by id;
 对于没有索引的列进行order by 就会出现filesort  [关于书中filesort](./filesort.jpg) 
-<img src="https://raw.githubusercontent.com/uncleyeung/mysql-order-by/master/filesort.jpg" alt="GitHub" title="GitHub,Social Coding" width="100" height="50" />
+
 
 
 + Using index condition
