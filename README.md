@@ -69,7 +69,9 @@ MySQL 使用临时表来实现 distinct 操作。
 + Using filesort
 若查询所需的排序与使用的索引的排序一致，因为索引是已排序的，因此按索引的顺序读取结果返回，否则，在取得结果后，还需要按查询所需的顺序对结果进行排序，这时就会出现 Using filesort 。
 select * from a order by id;
-对于没有索引的列进行order by 就会出现filesort  [关于书中filesort](./filesort.jpg)
+对于没有索引的列进行order by 就会出现filesort  [关于书中filesort](./filesort.jpg) 
+<img src="https://raw.githubusercontent.com/uncleyeung/mysql-order-by/master/filesort.jpg" alt="GitHub" title="GitHub,Social Coding" width="100" height="50" />
+
 
 + Using index condition
 在5.6版本后加入的新特性（Index Condition Pushdown），会先条件过滤索引，过滤完索引后找到所有符合索引条件的数据行，随后用 WHERE 子句中的其他条件去过滤这些数据行。
