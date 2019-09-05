@@ -53,8 +53,10 @@
 + Using index
 此查询使用了覆盖索引(Covering Index)，即通过索引就能返回结果，无需访问表。
 若没显示"Using index"表示读取了表数据。
+（另一种解释:直接访问索引就足够获取到所需要的数据，不需要通过索引回表）
 + Using where
 表示 MySQL 服务器从存储引擎收到行后再进行“后过滤”（Post-filter）。所谓“后过滤”，就是先读取整行数据，再检查此行是否符合 where 句的条件，符合就留下，不符合便丢弃。因为检查是在读取行后才进行的，所以称为“后过滤”。
+（另一种解释:优化器需要通过索引回表查询数据，本人否定）
 + Using temporary
 使用到临时表
 建表及插入数据：
@@ -67,7 +69,11 @@ MySQL 使用临时表来实现 distinct 操作。
 + Using filesort
 若查询所需的排序与使用的索引的排序一致，因为索引是已排序的，因此按索引的顺序读取结果返回，否则，在取得结果后，还需要按查询所需的顺序对结果进行排序，这时就会出现 Using filesort 。
 select * from a order by id;
-对于没有索引的列进行order by 就会出现filesort
+对于没有索引的列进行order by 就会出现filesort  [关于书中filesort](./filesort.jpg)
+
++ Using index condition
+在5.6版本后加入的新特性（Index Condition Pushdown），会先条件过滤索引，过滤完索引后找到所有符合索引条件的数据行，随后用 WHERE 子句中的其他条件去过滤这些数据行。
+
 -----
 
 ### 准备一些基础数据
@@ -154,6 +160,7 @@ EXPLAIN SELECT age FROM test WHERE name ="gggg";
  1 | SIMPLE | test | null | ref | index_test_name,index_test_name_id | index_test_name | 768 | const | 3 | 100.00 | null
 
 ##### 综上所述
++ sql1：按照Using where的另一种解释解释不通，*肯定进行了回表查询，填充其余数据，但是没有出现Using where？
 + 查询最好避免使用[*]作为查询列
 + 当查询命中索引列，查询列也为索引列，查询效率最高，不需要访问表，推荐使用
 + 当命中索引时type=ref，非唯一索引访问(只有普通索引)
@@ -221,4 +228,51 @@ EXPLAIN SELECT name FROM test ORDER BY name desc;
 + sql3&sql4查询列中只存在索引列，所以使用了覆盖索引Extra为Using index，
 + 至于排序进阶版实验的sql1和排序基础版实验的sql1都是索引，只不过一个是主键索引一个是普通索引，结果确是order by id：tyep为index & order by name：tyep为all [请点击这里见解答](https://segmentfault.com/q/1010000004197413)
  ----
- **排序搞鸡版实验 待续。。。**
+
+ ### 排序搞鸡版实验 
+ ```sql
+---排序实验：有查询条件命中索引分析
+EXPLAIN SELECT * FROM test WHERE name ="gggg" ORDER BY age desc;
+EXPLAIN SELECT * FROM test WHERE name ="gggg" ORDER BY id desc;
+EXPLAIN SELECT * FROM test WHERE name ="gggg" ORDER BY name desc;
+EXPLAIN SELECT id,name FROM test WHERE name ="gggg" ORDER BY name desc;
+EXPLAIN SELECT id,name FROM test WHERE name ="gggg" ORDER BY id desc;
+ 
+ ```
+ 
+ ##### EXPLAIN 结果
+ +  1 全表扫描type：ref，Extra为Using index condition; Using filesort
+ 
+  id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra 
+  :------| :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ 
+ 1 | SIMPLE | test | null | ref | index_test_name,index_test_name_id | index_test_name | 768 | const | 3 | 100.00 | Using index condition; Using filesort
+ +  2 全表扫描type：ref，Extra为Using where
+ 
+  id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra 
+  :------| :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ 
+ 1 | SIMPLE | test | null | ref | index_test_name,index_test_name_id | index_test_name | 768 | const | 3 | 100.00 | Using where
+ +  3 全表扫描type：ref，Extra为null
+ 
+  id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra 
+  :------| :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ 
+ 1 | SIMPLE | test | null | ref | index_test_name,index_test_name_id | index_test_name | 768 | const | 3 | 100.00 | null
+ +  4 全表扫描type：ref，Extra为Using index
+ 
+  id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra 
+  :------| :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ 
+ 1 | SIMPLE | test | null | ref | index_test_name,index_test_name_id | index_test_name | 768 | const | 3 | 100.00 | null
+ +  5 全表扫描type：ref，Extra为Using index
+ 
+  id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra 
+  :------| :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ | :------ 
+ 1 | SIMPLE | test | null | ref | index_test_name,index_test_name_id | index_test_name | 768 | const | 3 | 100.00 | null
+ 
+ ##### 综上所述
+ + sql1： 出现Using index condition; Using filesort，不奇怪，我们命中了索引，按照Using index condition的解释，从name=“gggg”找到符合索引条件的数据行，当且仅当只有一个数据行一个查询条件，拿到结果集后进行二次排序产生Using filesort（内存/磁盘排序）
+ ，但是无法解释·「EXPLAIN SELECT * FROM test WHERE name ="gggg" 」 Extra：NULL的原因
+ + sql2： 命中索引，order by为主键id，Extra：Using where，先读取整行数据在检查此行是否符合where条件，所以产生了Using where？当进行id排序的时候是不是可以理解排序也是一种特殊的查询两两查询过滤,所以出现了Using where？但是这个没有出现Using index condition。。
+ + sql3： 没有争议命中索引name列，并且order by排序使用的也是name索引列，没有产生二次排序则没有出现Using filesort
+ + sql4&5： 命中索引取出数据集，当进行排序的时候由于id/name都是所以列，还是那个我认为的,排序是二次查询，当二次查询的时候发现条件是索引列（索引已排序），则产生了Using index，sql2&3没有出现using index因为使用了[*]
+ + 
+  ----
+   **以上内容为本人理解，可能会有不正确的地方，大家觉得有问题，以免造成学术误导，请留言探讨。。。**
