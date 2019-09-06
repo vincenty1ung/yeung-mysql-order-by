@@ -282,3 +282,5 @@ EXPLAIN SELECT id,name FROM test WHERE name ="gggg" ORDER BY id desc;
    **在Using index condition 和Using where，本人尚有不解之迷。。**
    
    **参考：https://www.cnblogs.com/kerrycode/p/9909093.html**
+   
+   **参考：https://stackoverflow.com/questions/28759576/mysql-using-index-condition-vs-using-where-using-index**
