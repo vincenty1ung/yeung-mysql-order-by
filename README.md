@@ -278,3 +278,5 @@ EXPLAIN SELECT id,name FROM test WHERE name ="gggg" ORDER BY id desc;
  + 
   ----
    **以上内容为本人理解，可能会有不正确的地方，大家觉得有问题，以免造成学术误导，请留言探讨。。。**
+   
+   **在Using index condition 和Using where，本人尚有不解之迷。。**
